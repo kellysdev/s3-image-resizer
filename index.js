@@ -1,8 +1,8 @@
-const AWS = require("@aws-sdk"),
+const S3Client = require("@aws-sdk/client-s3"),
   sharp = require("sharp"),
   mime = require("mime-types");
 
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
   // Read data from event object
   const region = event.Records[0].awsRegion;
   const bucket = event.Records[0].s3.bucket.name;
@@ -14,7 +14,7 @@ exports.handler = async (event) => {
   console.log(fileType);
 
   // Instantiate a new s3 client
-  const s3 = new AWS.S3({
+  const s3 = new S3Client({
     region: region
   });
 
@@ -26,20 +26,22 @@ exports.handler = async (event) => {
     }
 
     // Get the original image
-    const originalImage = await s3.getObject({
+    const originalImage = await s3.send(GetObjectCommand({
       Bucket: bucket,
       Key: imageKey,
       ResponseContentType: fileType
-    }).promise();
+    }));
     console.log(originalImage);
+    res.setHeader("Content-Type", fileType);
+    originalImage.Body.pipe(res);
 
     // Resize the image
     const resizedImage = await sharp(originalImage)
       .resize(300)
       .toBuffer();
 
-    // Upload resized image  
-    return s3.send(new putObject({
+    // Upload resized image 
+    return await s3.send(new PutObjectCommand({
       Body: resizedImage,
       Bucket: bucket,
       Key: imageKey.replace(".", "_resized")
