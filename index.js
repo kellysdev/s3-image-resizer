@@ -5,7 +5,7 @@ exports.handler = async (event) => {
   // Read data from event object
   const region = event.Records[0].awsRegion;
   const bucket = event.Records[0].s3.bucket.name;
-  const imageKey = event.Records[0].s3.object.sourceKey;
+  const imageKey = event.Records[0].s3.object.key;
   console.log(imageKey);
 
   // Instantiate a new s3 client
