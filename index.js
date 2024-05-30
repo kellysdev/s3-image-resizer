@@ -6,8 +6,6 @@ exports.handler = async (event) => {
   const region = event.Records[0].awsRegion;
   const bucket = event.Records[0].s3.bucket.name;
   const imageKey = decodeURIComponent(event.Records[0].s3.object.key);
-  console.log(event.Records[0].eventName);
-  console.log(imageKey);
 
   // Instantiate a new s3 client
   const s3 = new AWS.S3({
@@ -20,21 +18,26 @@ exports.handler = async (event) => {
     return;
   };
 
-  // Get the original image
-  s3.getObject({Bucket: bucket, Key: imageKey}).promise()
+  try {
+    // Get the original image
+    const originalImage = await s3.getObject({Bucket: bucket, Key: imageKey}).promise();
+
     // Resize the image
-    .then(data => sharp(data.Body)
+    const resizedImageBuffer = await sharp(originalImage.Body)
       .resize(300)
       .toFormat("png")
-      .toBuffer()
-    )
-    // Reupload the image
-    .then(buffer => s3.putObject({
-        Body: buffer,
-        Bucket: bucket,
-        Key: imageKey.replace(".", "_resized"),
-        ContentType: "image/png"
-      }).promise()
-    )
-    .catch(err => console.log(err));
+      .toBuffer();
+
+    // Upload image
+    await s3.putObject({
+      Body: resizedImageBuffer,
+      Bucket: bucket,
+      Key: imageKey.replace(`original-images/${imageKey}.`, `${imageKey}_resized.`),
+      ContentType: "image/png"
+    }).promise();
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Something went wrong.");
+  };
+
 };
