@@ -18,7 +18,6 @@
   "homepage": "https://github.com/kellysdev/s3-image-resizer#readme",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.587.0",
-    "mime-types": "^2.1.35",
     "sharp": "^0.33.4"
   }
 }
