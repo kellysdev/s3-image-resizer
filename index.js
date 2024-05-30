@@ -1,6 +1,6 @@
 const AWS = require("@aws-sdk"),
   sharp = require("sharp"),
-  mine = require("mime-types");
+  mime = require("mime-types");
 
 exports.handler = async (event) => {
   // Read data from event object
