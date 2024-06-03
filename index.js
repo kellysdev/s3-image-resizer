@@ -32,7 +32,7 @@ exports.handler = async (event) => {
     await s3.putObject({
       Body: resizedImageBuffer,
       Bucket: bucket,
-      Key: imageKey.replace(".", "_resized."),
+      Key: imageKey.replace("original-images", "resized"),
       ContentType: "image/png"
     }).promise();
   } catch (err) {
