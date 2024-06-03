@@ -24,7 +24,7 @@ exports.handler = async (event) => {
 
     // Resize the image
     const resizedImageBuffer = await sharp(originalImage.Body)
-      .resize(300)
+      .resize(150)
       .toFormat("png")
       .toBuffer();
 
